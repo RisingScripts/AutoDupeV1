@@ -1,0 +1,32 @@
+local Library = {}
+
+function Library:CreateWindow(title)
+    -- [ ... your existing UI setup code ... ]
+    
+    -- IMPORTANT: Move your helper functions (addToggleWidget, etc) 
+    -- INSIDE the CreateWindow function or the Library table 
+    -- so that they can be accessed.
+
+    local function addActionWidget(parentPage, btnText, callback)
+        -- ... your existing action widget code ...
+    end
+
+    local function addToggleWidget(parentPage, titleText, descText, callback)
+        -- ... your existing toggle widget code ...
+    end
+
+    local Window = {}
+    function Window:CreateTab(name)
+        -- [ ... your existing tab code ... ]
+        
+        local Tab = {}
+        function Tab:AddButton(text, callback) return addActionWidget(page, text, callback) end
+        function Tab:AddToggle(text, desc, callback) return addToggleWidget(page, text, desc, callback) end
+        return Tab
+    end
+    
+    return Window
+end
+
+-- THIS IS THE CRITICAL LINE AT THE BOTTOM
+return Library
