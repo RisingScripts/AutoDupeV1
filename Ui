@@ -1,0 +1,77 @@
+local Library = {}
+
+function Library:CreateWindow(title)
+    local Players = game:GetService("Players")
+    local UserInputService = game:GetService("UserInputService")
+    local TweenService = game:GetService("TweenService")
+    local LocalPlayer = Players.LocalPlayer
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+    if PlayerGui:FindFirstChild("RisingScripts_MainSys") then PlayerGui.RisingScripts_MainSys:Destroy() end
+
+    local screenGui = Instance.new("ScreenGui", PlayerGui)
+    screenGui.Name = "RisingScripts_MainSys"
+    screenGui.ResetOnSpawn = false
+    screenGui.DisplayOrder = 100 
+
+    local mainFrame = Instance.new("ImageLabel", screenGui)
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = UDim2.new(0, 450, 0, 250) 
+    mainFrame.Position = UDim2.new(0.5, -225, 0.5, -125)
+    mainFrame.Image = "rbxthumb://type=Asset&id=82025405058613&w=420&h=420"
+    mainFrame.ScaleType = Enum.ScaleType.Crop
+    mainFrame.Active = true
+    mainFrame.ClipsDescendants = true 
+    Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+
+    -- [ Dragging Logic ]
+    local function makeDraggable(gui)
+        local dragging, dragInput, dragStart, startPos
+        gui.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true; dragStart = input.Position; startPos = gui.Position
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local delta = input.Position - dragStart
+                gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+        UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+    end
+    makeDraggable(mainFrame)
+
+    local windowCanvas = Instance.new("Frame", mainFrame)
+    windowCanvas.Name = "WindowCanvas"
+    windowCanvas.Position = UDim2.new(0, 105, 0, 40) 
+    windowCanvas.Size = UDim2.new(1, -120, 1, -50)
+    windowCanvas.BackgroundTransparency = 1
+
+    local navBar = Instance.new("Frame", mainFrame)
+    navBar.Position = UDim2.new(0, 0, 0, 30)
+    navBar.Size = UDim2.new(0, 90, 1, -30)
+    navBar.BackgroundTransparency = 1
+    Instance.new("UIListLayout", navBar).Padding = UDim.new(0, 6)
+
+    local Window = {}
+    function Window:CreateTab(name)
+        local page = Instance.new("ScrollingFrame", windowCanvas)
+        page.Size = UDim2.new(1, 0, 1, 0); page.BackgroundTransparency = 1; page.Visible = false
+        page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        Instance.new("UIListLayout", page).Padding = UDim.new(0, 12)
+        
+        local tabBtn = Instance.new("TextButton", navBar)
+        tabBtn.Size = UDim2.new(0, 84, 0, 28); tabBtn.Text = name
+        tabBtn.MouseButton1Click:Connect(function()
+            for _, p in pairs(windowCanvas:GetChildren()) do if p:IsA("ScrollingFrame") then p.Visible = false end end
+            page.Visible = true
+        end)
+        
+        local Tab = {}
+        function Tab:AddButton(text, callback) return addActionWidget(page, text, callback) end
+        function Tab:AddToggle(text, desc, callback) return addToggleWidget(page, text, desc, callback) end
+        return Tab
+    end
+    return Window
+end
